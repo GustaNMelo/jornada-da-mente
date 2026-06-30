@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Convidar para o desafio')}"></head>
+<body>
+<div class="app-layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('desafios')}"></aside>
+
+  <main class="main-content">
+    <div class="main-header">
+      <h1>Convidar para o desafio</h1>
+    </div>
+
+    <div class="card" style="max-width:480px;">
+      <h3 style="margin:0 0 4px; font-size:16px;" th:text="${desafio.titulo}"></h3>
+      <p style="margin:0 0 18px; color:var(--text-s); font-size:14px;">Escolha um usuário cadastrado no sistema para convidar para este desafio.</p>
+
+      <div th:if="${#lists.isEmpty(usuariosConvidaveis)}" class="empty-state">
+        Não há usuários disponíveis para convidar (todos já participam ou já foram convidados).
+      </div>
+
+      <form th:if="${!#lists.isEmpty(usuariosConvidaveis)}" th:action="@{/desafios/{id}/convidar(id=${desafio.id})}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <div class="form-group">
+          <label for="usuarioId">Usuário</label>
+          <select class="form-control" id="usuarioId" name="usuarioId" required>
+            <option th:each="u : ${usuariosConvidaveis}" th:value="${u.id}" th:text="${u.nome} + ' (' + ${u.email} + ')'"></option>
+          </select>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button type="submit" class="btn btn-primary">Enviar convite</button>
+          <a th:href="@{/desafios(id=${desafio.id})}" class="btn btn-secondary">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Desafios')}"></head>
+<body>
+<div class="app-layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('desafios')}"></aside>
+
+  <main class="main-content">
+    <div class="main-header">
+      <h1>Desafios em Equipe</h1>
+      <span class="date" th:text="${#temporals.format(dataAtual, 'dd/MM/yyyy')}"></span>
+    </div>
+
+    <div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
+    <div th:if="${erro}" class="alert alert-danger" th:text="${erro}"></div>
+
+    <div th:if="${convitesPendentesCount != null and convitesPendentesCount > 0}" class="alert alert-success" style="display:flex; align-items:center; justify-content:space-between;">
+      <span th:text="'🔔 Você tem ' + ${convitesPendentesCount} + ' convite(s) de desafio pendente(s).'"></span>
+      <a th:href="@{/desafios/convites}" class="btn btn-secondary btn-sm">Ver convites</a>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+      <a th:href="@{/desafios/novo}" class="btn btn-primary">+ Criar desafio</a>
+      <a th:href="@{/desafios/convites}" class="btn btn-secondary">Meus convites</a>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(todosDesafios) and todosDesafios.size() > 1}" class="desafio-pills">
+      <a th:each="d : ${todosDesafios}"
+         th:href="@{/desafios(id=${d.id})}"
+         class="desafio-pill"
+         th:classappend="${desafio != null and d.id == desafio.id} ? 'active'"
+         th:text="${d.titulo}"></a>
+    </div>
+
+    <div th:if="${desafio == null}" class="empty-state">Nenhum desafio disponível ainda. Crie o primeiro!</div>
+
+    <div th:if="${desafio != null}">
+      <div class="card">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+          <h3 style="margin:0; font-size:18px;" th:text="${desafio.titulo}"></h3>
+          <span th:if="${souCriador}" class="badge badge-green">Seu desafio</span>
+        </div>
+        <p style="margin:0 0 16px; color:var(--text-s); font-size:14px;" th:text="${desafio.descricao}"></p>
+
+        <div class="progress-label">
+          <span th:text="'Progresso: ' + ${minhaParticipacao.diasCompletados} + '/' + ${desafio.duracaoDias} + ' dias'"></span>
+          <span th:text="'👥 ' + ${totalParticipantes} + ' Participantes'"></span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-bar-fill" th:style="'width:' + ${progressoPercentual} + '%'"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 16px; font-size:16px;">🏆 Ranking</h3>
+
+        <div th:if="${#lists.isEmpty(ranking)}" class="empty-state">Ninguém entrou nesse desafio ainda.</div>
+
+        <div th:each="participacao, iter : ${ranking}"
+             class="ranking-item"
+             th:classappend="${(iter.index == 0 ? 'rank-1' : '')
+                + (participanteAlteradoId != null and participacao.usuario.id == participanteAlteradoId ? ' just-changed' : '')
+                + (celebrarParticipanteId != null and participacao.usuario.id == celebrarParticipanteId ? ' celebrate' : '')}">
+          <div class="ranking-item-left">
+            <span th:if="${iter.index == 0}">🥇</span>
+            <span th:if="${iter.index == 1}">🥈</span>
+            <span th:if="${iter.index == 2}">🥉</span>
+            <span th:if="${iter.index > 2}" th:text="${iter.index + 1} + '°'"></span>
+            <span th:text="${participacao.usuario.nome}"></span>
+            <span th:if="${celebrarParticipanteId != null and participacao.usuario.id == celebrarParticipanteId}"
+                  class="celebrate-emoji">🎉</span>
+          </div>
+          <div class="ranking-item-right">
+            <div class="ranking-points" th:text="${participacao.pontos} + ' pts'"></div>
+            <div class="ranking-days"
+                 th:classappend="${desafio.duracaoDias > 0 and participacao.diasCompletados * 2 >= desafio.duracaoDias} ? 'green' : 'amber'"
+                 th:text="${participacao.diasCompletados} + '/' + ${desafio.duracaoDias} + ' dias'"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:14px; flex-wrap:wrap;">
+        <form th:action="@{/desafios/{id}/registrar-hoje(id=${desafio.id})}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button type="submit" class="btn btn-primary" th:disabled="${jaRegistrouHoje}">
+            <span th:if="${!jaRegistrouHoje}">Registrar hoje</span>
+            <span th:if="${jaRegistrouHoje}">Já registrado hoje ✓</span>
+          </button>
+        </form>
+        <a th:if="${souCriador}" th:href="@{/desafios/{id}/convidar(id=${desafio.id})}" class="btn btn-blue">Convidar amigo</a>
+        <form th:if="${jaRegistrouHoje}" th:action="@{/desafios/{id}/simular-dia(id=${desafio.id})}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button type="submit" class="btn btn-secondary" title="Apenas para demonstração">⏭ Simular novo dia</button>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script th:if="${tocarSom}">
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof tocarSomSucesso === 'function') { tocarSomSucesso(); }
+  });
+</script>
+</body>
+</html>

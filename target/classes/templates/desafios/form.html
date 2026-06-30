@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Novo desafio')}"></head>
+<body>
+<div class="app-layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('desafios')}"></aside>
+
+  <main class="main-content">
+    <div class="main-header">
+      <h1>Criar desafio</h1>
+    </div>
+
+    <div class="card" style="max-width:480px;">
+      <form th:action="@{/desafios/salvar}" th:object="${desafio}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <div class="form-group">
+          <label for="titulo">Título</label>
+          <input class="form-control" type="text" id="titulo" th:field="*{titulo}" required />
+        </div>
+        <div class="form-group">
+          <label for="descricao">Descrição</label>
+          <input class="form-control" type="text" id="descricao" th:field="*{descricao}" />
+        </div>
+        <div class="form-group">
+          <label for="duracaoDias">Duração (dias)</label>
+          <input class="form-control" type="number" id="duracaoDias" th:field="*{duracaoDias}" min="1" required />
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button type="submit" class="btn btn-primary">Criar desafio</button>
+          <a th:href="@{/desafios}" class="btn btn-secondary">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+</body>
+</html>

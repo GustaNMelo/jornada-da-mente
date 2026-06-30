@@ -1,0 +1,130 @@
+<aside th:fragment="sidebar(active)" class="sidebar">
+  <div class="sidebar-brand">
+    <img th:src="@{/images/logo-menu-lateral.png}" alt="Jornada da Mente" />
+  </div>
+
+  <div class="sidebar-section-label">Principal</div>
+  <nav class="sidebar-nav">
+    <a th:href="@{/home}" th:classappend="${active == 'home'} ? 'active'">🏠 Home</a>
+    <a th:href="@{/metas}" th:classappend="${active == 'metas'} ? 'active'">🎯 Metas</a>
+    <a th:href="@{/desafios}" th:classappend="${active == 'desafios'} ? 'active'" style="display:flex; align-items:center; justify-content:space-between;">
+      <span>🚩 Desafios</span>
+      <span th:if="${convitesPendentesCount != null and convitesPendentesCount > 0}" class="badge-notif" th:text="${convitesPendentesCount}"></span>
+    </a>
+    <a th:href="@{/mural}" th:classappend="${active == 'mural'} ? 'active'">💬 Mural</a>
+    <a th:href="@{/perfil}" th:classappend="${active == 'perfil'} ? 'active'">👤 Perfil</a>
+  </nav>
+
+  <button type="button" id="theme-toggle" class="theme-toggle">
+    <span class="theme-icon-to-dark">🌙 Modo escuro</span>
+    <span class="theme-icon-to-light">☀️ Modo claro</span>
+  </button>
+
+  <form class="sidebar-logout-form" th:action="@{/logout}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <button type="submit" class="btn-sair">Sair</button>
+  </form>
+
+  <!-- Feedback sonoro: um "tilintar" curto e suave (duas notas ascendentes),
+       usado apenas em conquistas positivas (concluir meta, registrar progresso
+       em desafio). Gerado via Web Audio API para não depender de arquivos de
+       áudio. Volume baixo e duração curta de propósito — o app é de saúde
+       mental/hábitos sem pressão, então o som deve confirmar, não alarmar. -->
+  <script>
+    function tocarSomSucesso() {
+      try {
+        var AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        var ctx = new AudioCtx();
+        var tocarNota = function (frequencia, inicio, duracao) {
+          var osc = ctx.createOscillator();
+          var gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = frequencia;
+          gain.gain.setValueAtTime(0.0001, inicio);
+          gain.gain.exponentialRampToValueAtTime(0.12, inicio + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, inicio + duracao);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(inicio);
+          osc.stop(inicio + duracao);
+        };
+        var agora = ctx.currentTime;
+        tocarNota(587.33, agora, 0.12);
+        tocarNota(880.00, agora + 0.10, 0.18);
+      } catch (e) {
+        // Web Audio indisponível neste navegador: falha silenciosamente.
+      }
+    }
+  </script>
+
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', function () {
+      var html = document.documentElement;
+      var ativandoEscuro = html.getAttribute('data-theme') !== 'dark';
+      if (ativandoEscuro) {
+        html.setAttribute('data-theme', 'dark');
+        localStorage.setItem('jdm-theme', 'dark');
+      } else {
+        html.removeAttribute('data-theme');
+        localStorage.setItem('jdm-theme', 'light');
+      }
+    });
+  </script>
+
+  <!-- Modal de confirmação genérico: qualquer <form> com data-confirm="..." passa a
+       abrir este modal em vez do confirm() nativo do navegador. -->
+  <div id="confirm-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-icon">⚠️</div>
+      <h3 class="modal-title">Confirmar ação</h3>
+      <p class="modal-message">Tem certeza?</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="confirm-modal-cancelar">Cancelar</button>
+        <button type="button" class="btn btn-danger-solid" id="confirm-modal-confirmar">Confirmar</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var modal = document.getElementById('confirm-modal');
+      var tituloEl = modal.querySelector('.modal-title');
+      var mensagemEl = modal.querySelector('.modal-message');
+      var btnConfirmar = document.getElementById('confirm-modal-confirmar');
+      var btnCancelar = document.getElementById('confirm-modal-cancelar');
+      var formPendente = null;
+
+      function fechar() {
+        modal.style.display = 'none';
+        formPendente = null;
+      }
+
+      document.addEventListener('submit', function (e) {
+        var form = e.target;
+        if (form.hasAttribute('data-confirm')) {
+          e.preventDefault();
+          formPendente = form;
+          tituloEl.textContent = form.getAttribute('data-confirm-titulo') || 'Confirmar ação';
+          mensagemEl.textContent = form.getAttribute('data-confirm');
+          btnConfirmar.textContent = form.getAttribute('data-confirm-label') || 'Confirmar';
+          modal.style.display = 'flex';
+        }
+      });
+
+      btnConfirmar.addEventListener('click', function () {
+        var form = formPendente;
+        modal.style.display = 'none';
+        formPendente = null;
+        if (form) { form.submit(); }
+      });
+
+      btnCancelar.addEventListener('click', fechar);
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) { fechar(); }
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.style.display === 'flex') { fechar(); }
+      });
+    })();
+  </script>
+</aside>

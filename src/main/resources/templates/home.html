@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Dashboard')}"></head>
+<body>
+<div class="app-layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('home')}"></aside>
+
+  <main class="main-content">
+    <div class="main-header">
+      <h1>Dashboard</h1>
+      <span class="date" th:text="${#temporals.format(dataAtual, 'dd/MM/yyyy')}"></span>
+    </div>
+
+    <div class="welcome-banner">
+      <h2 th:text="'Olá, ' + ${usuario.nome} + ' 👋'"></h2>
+      <p>Acompanhe seu progresso e transforme seus hábitos</p>
+    </div>
+
+    <div class="grid-cols-4" style="margin-bottom: 20px;">
+      <div class="stat-card stat-green">
+        <div>
+          <div class="stat-value">🎯 <span th:text="${metasAtivas}"></span></div>
+          <div class="stat-label">Metas ativas</div>
+        </div>
+      </div>
+      <div class="stat-card stat-amber">
+        <div>
+          <div class="stat-value">🏆 <span th:text="${usuario.pontosTotais}"></span></div>
+          <div class="stat-label">Pontos</div>
+        </div>
+      </div>
+      <div class="stat-card stat-pink">
+        <div>
+          <div class="stat-value">🥇 <span th:text="${conquistasCount}"></span></div>
+          <div class="stat-label">Conquista</div>
+        </div>
+      </div>
+      <div class="stat-card stat-blue">
+        <div>
+          <div class="stat-value">📊 <span th:text="${usuario.diasSeguidos}"></span></div>
+          <div class="stat-label">Dias seguidos</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-cols-2">
+      <div class="card" style="background:var(--green-l2); border:1px solid var(--green-l2);">
+        <div th:if="${proximaMeta != null}">
+          <div style="font-weight:600; color:var(--text-s); font-size:13px; margin-bottom:10px;">📝 Próxima meta</div>
+          <div style="font-weight:700; color:var(--green-text); font-size:16px; margin-bottom:14px;" th:text="${proximaMeta.titulo}"></div>
+          <form th:action="@{/home/metas/{id}/concluir(id=${proximaMeta.id})}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button type="submit" class="btn btn-primary btn-block">Marcar como feito</button>
+          </form>
+        </div>
+        <div th:if="${proximaMeta == null}" class="empty-state">Nenhuma meta pendente — parabéns! 🎉</div>
+      </div>
+
+      <div class="card" style="background:var(--blue-bg); border:1px solid var(--blue-bg);">
+        <div th:if="${desafioDestaque != null}">
+          <div style="font-weight:600; color:var(--text-s); font-size:13px; margin-bottom:10px;">🎮 Desafio do dia</div>
+          <div style="font-weight:700; color:var(--blue); font-size:16px; margin-bottom:14px;" th:text="${desafioDestaque.titulo}"></div>
+          <form th:action="@{/home/desafios/{id}/concluir-hoje(id=${desafioDestaque.id})}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button type="submit" class="btn btn-blue btn-block">Marcar como feito</button>
+          </form>
+        </div>
+        <div th:if="${desafioDestaque == null}" class="empty-state">Nenhum desafio disponível.</div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

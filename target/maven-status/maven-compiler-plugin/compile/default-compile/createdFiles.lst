@@ -1,0 +1,9 @@
+com\iftm\jornada_da_mente\config\SecurityConfig.class
+com\iftm\jornada_da_mente\controller\AuthController.class
+com\iftm\jornada_da_mente\JornadaDaMenteApplication.class
+com\iftm\jornada_da_mente\repository\UsuarioRepository.class
+com\iftm\jornada_da_mente\config\AppConfig.class
+com\iftm\jornada_da_mente\impl\UsuarioServiceImpl.class
+com\iftm\jornada_da_mente\controller\HomeController.class
+com\iftm\jornada_da_mente\model\Usuario.class
+com\iftm\jornada_da_mente\service\IUsuarioService.class

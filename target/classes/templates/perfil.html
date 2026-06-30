@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Meu Perfil')}"></head>
+<body>
+<div class="app-layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('perfil')}"></aside>
+
+  <main class="main-content">
+    <div class="main-header">
+      <h1>Meu Perfil</h1>
+      <span class="date" th:text="${#temporals.format(dataAtual, 'dd/MM/yyyy')}"></span>
+    </div>
+
+    <div class="card profile-header">
+      <div class="profile-avatar">👤</div>
+      <div>
+        <div class="profile-name" th:text="${usuario.nome}"></div>
+        <div class="profile-nivel" th:text="'Nível ' + ${usuario.nivel} + ' - ' + ${usuario.tituloNivel}"></div>
+        <div class="profile-membro-desde" th:text="'Membro desde ' + ${membroDesde}"></div>
+      </div>
+    </div>
+
+    <div class="profile-actions">
+      <a href="javascript:void(0)" class="btn btn-primary btn-block" title="Em breve">Editar Perfil</a>
+      <a href="javascript:void(0)" class="btn btn-blue btn-block" title="Em breve">Notificações</a>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 16px; font-size:16px;">📊 Suas estatísticas</h3>
+      <div class="grid-cols-4">
+        <div class="stat-card stat-card-vertical stat-green">
+          <div class="stat-value" th:text="${#numbers.formatInteger(usuario.pontosTotais, 1, 'POINT')}"></div>
+          <div class="stat-label">Pontos totais</div>
+        </div>
+        <div class="stat-card stat-card-vertical stat-blue">
+          <div class="stat-value" th:text="${usuario.diasSeguidos}"></div>
+          <div class="stat-label">Dias seguidos</div>
+        </div>
+        <div class="stat-card stat-card-vertical stat-amber">
+          <div class="stat-value" th:text="${metasCompletadas}"></div>
+          <div class="stat-label">Metas completadas</div>
+        </div>
+        <div class="stat-card stat-card-vertical stat-pink">
+          <div class="stat-value" th:text="${conquistasCount}"></div>
+          <div class="stat-label" th:text="${conquistasCount == 1} ? 'Conquista' : 'Conquistas'"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 16px; font-size:16px;">🏅 Suas conquistas</h3>
+      <div th:if="${#lists.isEmpty(conquistas)}" class="empty-state">
+        Você ainda não desbloqueou nenhuma conquista.
+      </div>
+      <div th:if="${!#lists.isEmpty(conquistas)}" class="profile-conquistas">
+        <div th:each="uc : ${conquistas}" class="profile-conquista">
+          <div class="profile-conquista-icone" th:text="${uc.conquista.icone}"></div>
+          <span th:text="${uc.conquista.nome}"></span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
